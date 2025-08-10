@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Leamsi Rec Radio</title>
+<style>
+  :root {
+    --gradiente: linear-gradient(
+      270deg,
+      #ff0000,
+      #ff8c00,
+      #00ff00,
+      #00ffff,
+      #ff00ff,
+      #ffff00,
+      #ff0000
+    );
+  }
+
+  body {
+    background: linear-gradient(90deg, #050087, #0A0257);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    font-family: sans-serif;
+    padding: 10px;
+  }
+
+  /* Pantalla de carga */
+  #loadingScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .loading-bar {
+    width: 100%;
+    max-width: 300px;
+    height: 30px;
+    background: #222;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .loading-progress {
+    height: 100%;
+    width: 0%;
+    background: var(--gradiente);
+    background-size: 600% 600%;
+    animation: animarColores 4s linear infinite;
+    transition: width 0.2s ease;
+  }
+
+  .loading-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+    font-size: 16px;
+    color: black;
+    top: 0;
+    left: 0;
+  }
+
+  @keyframes animarColores {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Contenido principal */
+  #mainContent {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  /* Notas musicales */
+  .nota {
+    position: absolute;
+    font-size: 24px;
+    animation: caer 6s linear infinite;
+    opacity: 0.9;
+    filter: brightness(1.5);
+    top: -50px;
+  }
+
+  @keyframes caer {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(110vh) scale(1.2); opacity: 0; }
+  }
+
+  /* Ecualizador */
+  .equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 50px;
+  }
+
+  .bar {
+    width: 8px;
+    border-radius: 4px;
+    filter: brightness(2) saturate(2);
+    transition: height 0.05s ease;
+    animation: cambiarColor 3s linear infinite;
+  }
+
+  @keyframes cambiarColor {
+    0%   { background: #ff0000; }
+    20%  { background: #ff8c00; }
+    40%  { background: #00ff00; }
+    60%  { background: #00ffff; }
+    80%  { background: #ff00ff; }
+    100% { background: #ff0000; }
+  }
+
+  /* Botón neón */
+  .foton-btn {
+    position: relative;
+    display: inline-block;
+    padding: 15px 40px;
+    font-size: 18px;
+    color: #fff;
+    background: #111;
+    border-radius: 16px;
+    text-decoration: none;
+    z-index: 1;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .foton-btn:hover {
+    transform: scale(1.05);
+    animation: pulso 1.5s infinite ease-in-out;
+  }
+
+  .foton-btn::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    background: var(--gradiente);
+    background-size: 600% 600%;
+    border-radius: 20px;
+    z-index: -1;
+    animation: animarColores 6s linear infinite;
+    filter: blur(6px) brightness(2) saturate(2);
+  }
+
+  .foton-btn::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    background: #111;
+    border-radius: 12px;
+    z-index: -1;
+  }
+
+  @keyframes pulso {
+    0% { transform: scale(1.05); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1.05); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Pantalla de carga -->
+<div id="loadingScreen">
+  <div class="loading-bar">
+    <div class="loading-progress" id="progressBar"></div>
+    <div class="loading-text" id="progressText">RADIO ARMADURA 0%</div>
+  </div>
+</div>
+
+<!-- Contenido principal -->
+<div id="mainContent">
+  <div class="equalizer">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <a href="https://appsservidormx-oss.github.io/MusicadelCielo/" class="foton-btn" target="_blank" rel="noopener noreferrer">
+    RADIO ARMADURA
+  </a>
+</div>
+
+<!-- Audio -->
+<audio autoplay  hidden>
+  <source src="https://cdn.pixabay.com/audio/2023/06/11/audio_bda3bb0f23.mp3" type="audio/mpeg">
+  " type="audio/mpeg">
+</audio>
+
+<script>
+  /* Barra de carga */
+  const progressBar = document.getElementById("progressBar");
+  const progressText = document.getElementById("progressText");
+  const loadingScreen = document.getElementById("loadingScreen");
+  const mainContent = document.getElementById("mainContent");
+  let porcentaje = 0;
+
+  const intervalo = setInterval(() => {
+    porcentaje += Math.floor(Math.random() * 10) + 5;
+    if (porcentaje > 100) porcentaje = 100;
+    progressBar.style.width = porcentaje + "%";
+    progressText.textContent = `Leamsi Rec ${porcentaje}%`;
+
+    if (porcentaje >= 100) {
+      clearInterval(intervalo);
+      setTimeout(() => {
+        loadingScreen.style.display = "none";
+        mainContent.style.display = "flex";
+      }, 500);
+    }
+  }, 300);
+
+  /* Lluvia de notas */
+  const notas = ["🎵","🎶","♫","♬"];
+  const colores = ["#ff0000","#ff8c00","#00ff00","#00ffff","#ff00ff","#ffff00"];
+
+  function crearNota(){
+    const nota = document.createElement("div");
+    nota.classList.add("nota");
+    nota.textContent = notas[Math.floor(Math.random() * notas.length)];
+    nota.style.left = Math.random() * 100 + "vw";
+    nota.style.color = colores[Math.floor(Math.random() * colores.length)];
+    nota.style.animationDuration = (4 + Math.random() * 4) + "s";
+    document.body.appendChild(nota);
+    setTimeout(() => nota.remove(), 8000);
+  }
+  setInterval(crearNota, 2000);
+
+  /* Ecualizador al ritmo de la música */
+  window.addEventListener("DOMContentLoaded", () => {
+    const audio = document.querySelector("audio");
+    audio.crossOrigin = "anonymous";
+    const bars = document.querySelectorAll(".bar");
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaElementSource(audio);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 128; // más precisión
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      analyser.getByteFrequencyData(dataArray);
+      bars.forEach((bar, i) => {
+        const value = dataArray[i % bufferLength];
+        const height = Math.max(5, (value / 255) * 50);
+        bar.style.height = height + "px";
+      });
+    }
+
+    document.body.addEventListener("click", () => {
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+        audio.play();
+      }
+    });
+
+    animate();
+  });
+</script>
+
+</body>
+</html>
